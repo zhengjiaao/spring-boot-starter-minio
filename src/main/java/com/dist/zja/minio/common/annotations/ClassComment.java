@@ -15,4 +15,7 @@ import java.lang.annotation.*;
 @Inherited
 public @interface ClassComment {
     String value() default "";
+
+    //开发者
+    String author() default "";
 }

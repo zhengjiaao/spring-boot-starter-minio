@@ -47,8 +47,14 @@ public class MinioProperties {
     /**
      * Minio SECRET_KEY
      */
-    @AttributeComment(" Minio SECRET_KEY")
+    @AttributeComment("Minio SECRET_KEY")
     private String secretKey;
+
+    /**
+     * Minio DEFAULT_BUCKET ,可选
+     */
+    @AttributeComment("Minio DEFAULT_BUCKET,可选的 defaultBucket")
+    private String defaultBucket;
 
     public boolean isEnabled() {
         return enabled;
@@ -98,6 +104,14 @@ public class MinioProperties {
         this.secure = secure;
     }
 
+    public String getDefaultBucket() {
+        return defaultBucket;
+    }
+
+    public void setDefaultBucket(String defaultBucket) {
+        this.defaultBucket = defaultBucket;
+    }
+
     @Override
     public String toString() {
         return "MinioProperties{" +
@@ -107,6 +121,7 @@ public class MinioProperties {
                 ", port=" + port +
                 ", accessKey='" + accessKey + '\'' +
                 ", secretKey='" + secretKey + '\'' +
+                ", defaultBucket='" + defaultBucket + '\'' +
                 '}';
     }
 }

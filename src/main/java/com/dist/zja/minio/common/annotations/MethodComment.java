@@ -21,7 +21,7 @@ public @interface MethodComment {
     String function() default "";
 
     //参数
-    Param[] params();
+    Param[] params() default {};
 
     //描述
     String description() default "";

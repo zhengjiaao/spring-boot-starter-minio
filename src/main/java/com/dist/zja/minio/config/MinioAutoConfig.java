@@ -4,11 +4,13 @@ import com.dist.zja.minio.MinIoObjectService;
 import com.dist.zja.minio.MinioBucketService;
 import com.dist.zja.minio.properties.MinioProperties;
 import io.minio.MinioClient;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.util.StringUtils;
 
 /**
  * Company: 上海数慧系统技术有限公司
@@ -43,13 +45,18 @@ public class MinioAutoConfig {
     @Bean(initMethod = "init")
     @ConditionalOnMissingBean
     public MinioBucketService minioBucketService(MinioClient minioClient) {
-        return new MinioBucketService(minioClient);
+        if (StringUtils.isEmpty(minIo.getDefaultBucket())) {
+            return new MinioBucketService(minioClient);
+        }
+        return new MinioBucketService(minioClient, minIo.getDefaultBucket());
     }
 
     @Bean(initMethod = "init")
     @ConditionalOnMissingBean
     public MinIoObjectService minIoObjectService(MinioClient minioClient) {
-        return new MinIoObjectService(minioClient);
+        if (StringUtils.isEmpty(minIo.getDefaultBucket())) {
+            return new MinIoObjectService(minioClient);
+        }
+        return new MinIoObjectService(minioClient, minIo.getDefaultBucket());
     }
-
 }
