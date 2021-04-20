@@ -28,6 +28,7 @@
 ### 使用
 
 引入封装依赖:
+https://docs.min.io/docs/java-client-quickstart-guide
 
 ```xml
     <dependency>

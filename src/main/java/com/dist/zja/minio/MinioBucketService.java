@@ -25,7 +25,7 @@ import java.util.List;
  * Email: zhengja@dist.com.cn
  * Desc：
  */
-@ClassComment(value = "Minio 文件服务-操作存储桶")
+@ClassComment(value = "Minio 桶服务-操作存储桶")
 public class MinioBucketService {
 
     public static Logger logger = LoggerFactory.getLogger(MinioBucketService.class);
@@ -43,6 +43,9 @@ public class MinioBucketService {
         this.defaultBucket = defaultBucket;
     }
 
+    /**
+     * 初始化默认桶
+     */
     public void init() {
         if (!StringUtils.isEmpty(defaultBucket)) {
             makeBucket();
@@ -52,298 +55,10 @@ public class MinioBucketService {
         logger.info("com.dist.zja.minio.MinioBucketService  Init Success！");
     }
 
-    @MethodComment(
-            function = "判断bucket是否存在",
-            description = "使用默认桶 defaultBucket，必须配置 dist.minio.config.default-bucket= ")
-    public boolean bucketExists() throws IOException, InvalidKeyException, InvalidResponseException, InsufficientDataException, NoSuchAlgorithmException, ServerException, InternalException, XmlParserException, ErrorResponseException {
-        validateBucketName(defaultBucket);
-        return minioClient.bucketExists(BucketExistsArgs.builder().bucket(defaultBucket).build());
-    }
-
-    @MethodComment(
-            function = "判断bucket是否存在",
-            params = {@Param(name = "bucketName", description = "桶名")})
-    public boolean bucketExists(String bucketName) throws IOException, InvalidKeyException, InvalidResponseException, InsufficientDataException, NoSuchAlgorithmException, ServerException, InternalException, XmlParserException, ErrorResponseException {
-        return minioClient.bucketExists(BucketExistsArgs.builder().bucket(bucketName).build());
-    }
-
-    @MethodComment(
-            function = "判断bucket是否存在",
-            params = {@Param(name = "bucketName", description = "桶名"),
-                    @Param(name = "region", description = "域")})
-    public boolean bucketExists(String bucketName, String region) throws IOException, InvalidKeyException, InvalidResponseException, InsufficientDataException, NoSuchAlgorithmException, ServerException, InternalException, XmlParserException, ErrorResponseException {
-        return minioClient.bucketExists(BucketExistsArgs.builder().bucket(bucketName).region(region).build());
-    }
-
-    @MethodComment(
-            function = "创建默认桶",
-            description = "使用默认桶 defaultBucket，必须配置 dist.minio.config.default-bucket= ")
-    public boolean makeBucket() {
-        validateBucketName(defaultBucket);
-        try {
-            boolean isExist = bucketExists(defaultBucket);
-            if (!isExist) {
-                minioClient.makeBucket(MakeBucketArgs.builder().bucket(defaultBucket).build());
-            }
-            return true;
-        } catch (Exception e) {
-            logger.error(e.getMessage(), e);
-            return false;
-        }
-    }
-
-    @MethodComment(
-            function = "创建 bucket",
-            params = {@Param(name = "bucketName", description = "桶名")})
-    public boolean makeBucket(String bucketName) {
-        try {
-            boolean isExist = bucketExists(bucketName);
-            if (!isExist) {
-                minioClient.makeBucket(MakeBucketArgs.builder().bucket(bucketName).build());
-            }
-            return true;
-        } catch (Exception e) {
-            logger.error(e.getMessage(), e);
-            return false;
-        }
-    }
-
-    @MethodComment(
-            function = "创建 bucket",
-            params = {@Param(name = "bucketName", description = "桶名"),
-                    @Param(name = "region", description = "域")})
-    public boolean makeBucket(String bucketName, String region) {
-        try {
-            boolean isExist = bucketExists(bucketName, region);
-            if (!isExist) {
-                minioClient.makeBucket(MakeBucketArgs.builder().bucket(bucketName).region(region).build());
-            }
-            return true;
-        } catch (Exception e) {
-            logger.error(e.getMessage(), e);
-            return false;
-        }
-    }
-
-    @MethodComment(
-            function = "列出所有存储桶名称列表", params = {@Param(name = "无", description = "无")})
-    public List<String> listBucketNames() throws Exception {
-        List<Bucket> bucketList = listBuckets();
-        List<String> bucketListName = new ArrayList<>();
-        for (Bucket bucket : bucketList) {
-            bucketListName.add(bucket.name());
-        }
-        return bucketListName;
-    }
-
-    @MethodComment(
-            function = "列出所有存储桶", params = {@Param(name = "无", description = "无")})
-    public List<Bucket> listBuckets() throws Exception {
-        return minioClient.listBuckets();
-    }
-
-    @MethodComment(
-            function = "列出存储桶中的所有对象名称",
-            params = {
-                    @Param(name = "bucketName", description = "桶名")
-            })
-    public List<String> listObjectNames(String bucketName) throws Exception {
-        List<String> listObjectNames = new ArrayList<>();
-        boolean flag = bucketExists(bucketName);
-        if (flag) {
-            Iterable<Result<Item>> myObjects = listObjects(bucketName);
-            for (Result<Item> result : myObjects) {
-                Item item = result.get();
-                listObjectNames.add(item.objectName());
-            }
-        }
-        return listObjectNames;
-    }
-
-    @MethodComment(
-            function = "列出默认桶中所有对象",
-            description = "使用默认桶 defaultBucket，必须配置 dist.minio.config.default-bucket= ")
-    public Iterable<Result<Item>> listObjects() throws Exception {
-        validateBucketName(defaultBucket);
-        boolean flag = bucketExists(defaultBucket);
-        if (flag) {
-            return minioClient.listObjects(ListObjectsArgs.builder().bucket(defaultBucket).build());
-        }
-        return null;
-    }
-
-    @MethodComment(
-            function = "列出存储桶中的所有对象",
-            params = {
-                    @Param(name = "bucketName", description = "桶名")
-            })
-    public Iterable<Result<Item>> listObjects(String bucketName) throws Exception {
-        boolean flag = bucketExists(bucketName);
-        if (flag) {
-            return minioClient.listObjects(ListObjectsArgs.builder().bucket(bucketName).build());
-        }
-        return null;
-    }
-
-    @MethodComment(
-            function = "获取默认存储桶策略",
-            description = "使用默认桶 defaultBucket，必须配置 dist.minio.config.default-bucket= ")
-    public void getBucketPolicy() throws Exception {
-        validateBucketName(defaultBucket);
-        minioClient.getBucketPolicy(
-                GetBucketPolicyArgs.builder()
-                        .bucket(defaultBucket)
-                        .build());
-    }
-
-    @MethodComment(
-            function = "获取存储桶策略",
-            params = {
-                    @Param(name = "bucketName", description = "桶名")
-            })
-    public void getBucketPolicy(String bucketName) throws Exception {
-        minioClient.getBucketPolicy(
-                GetBucketPolicyArgs.builder()
-                        .bucket(bucketName)
-                        .build());
-    }
-
-    @MethodComment(
-            function = "获取存储桶策略",
-            params = {
-                    @Param(name = "bucketName", description = "桶名")
-            })
-    public void getBucketPolicy(String bucketName, String region) throws Exception {
-        minioClient.getBucketPolicy(
-                GetBucketPolicyArgs.builder()
-                        .bucket(bucketName)
-                        .region(region)
-                        .build());
-    }
-
-    @MethodComment(
-            function = "设定默认存储桶策略",
-            params = {
-                    @Param(name = "policyJson", description = "策略json")
-            },
-            description = "使用默认桶 defaultBucket，必须配置 dist.minio.config.default-bucket= ")
-    public void setBucketPolicy(String policyJson) throws Exception {
-        validateBucketName(defaultBucket);
-        minioClient.setBucketPolicy(
-                SetBucketPolicyArgs.builder()
-                        .bucket(defaultBucket)
-                        .config(policyJson)
-                        .build());
-    }
-
-
-    @MethodComment(
-            function = "设定存储桶策略",
-            params = {
-                    @Param(name = "bucketName", description = "桶名"),
-                    @Param(name = "policyJson", description = "策略json")
-
-            })
-    public void setBucketPolicy(String bucketName, String policyJson) throws Exception {
-        minioClient.setBucketPolicy(
-                SetBucketPolicyArgs.builder()
-                        .bucket(bucketName)
-                        .config(policyJson)
-                        .build());
-    }
-
-    @MethodComment(
-            function = "设定存储桶策略",
-            params = {
-                    @Param(name = "bucketName", description = "桶名"),
-                    @Param(name = "region", description = "域"),
-                    @Param(name = "policyJson", description = "策略json")
-
-            })
-    public void setBucketPolicy(String bucketName, String region, String policyJson) throws Exception {
-        minioClient.setBucketPolicy(
-                SetBucketPolicyArgs.builder()
-                        .bucket(bucketName)
-                        .region(region)
-                        .config(policyJson)
-                        .build());
-    }
-
-    @MethodComment(
-            function = "删除默认桶",
-            description = "使用默认桶 defaultBucket，必须配置 dist.minio.config.default-bucket= ")
-    public boolean deleteBucket() {
-        validateBucketName(defaultBucket);
-        try {
-            minioClient.deleteBucketEncryption(
-                    DeleteBucketEncryptionArgs.builder().bucket(defaultBucket).build());
-            return true;
-        } catch (Exception e) {
-            logger.error(e.getMessage(), e);
-            return false;
-        }
-    }
-
-    @MethodComment(
-            function = "删除桶",
-            params = {
-                    @Param(name = "bucketName", description = "桶名")
-            })
-    public boolean deleteBucket(String bucketName) {
-        try {
-            minioClient.deleteBucketEncryption(
-                    DeleteBucketEncryptionArgs.builder().bucket(bucketName).build());
-            return true;
-        } catch (Exception e) {
-            logger.error(e.getMessage(), e);
-            return false;
-        }
-    }
-
-    @MethodComment(
-            function = "删除桶",
-            params = {
-                    @Param(name = "bucketName", description = "桶名"),
-                    @Param(name = "region", description = "域")
-            })
-    public boolean deleteBucket(String bucketName, String region) {
-        try {
-            minioClient.deleteBucketEncryption(
-                    DeleteBucketEncryptionArgs.builder().bucket(bucketName).region(region).build());
-            return true;
-        } catch (Exception e) {
-            logger.error(e.getMessage(), e);
-            return false;
-        }
-    }
-
-    @MethodComment(
-            function = "删除 bucket 只能删除空桶",
-            params = {
-                    @Param(name = "bucketName", description = "桶名")
-            })
-    public boolean deleteBucketByNull(String bucketName) throws Exception {
-        boolean flag = bucketExists(bucketName);
-        if (flag) {
-            Iterable<Result<Item>> myObjects = listObjects(bucketName);
-            for (Result<Item> result : myObjects) {
-                Item item = result.get();
-                // 有对象文件，则删除失败
-                if (item.size() > 0) {
-                    return false;
-                }
-            }
-            // 删除存储桶，注意，只有存储桶为空时才能删除成功。
-            minioClient.removeBucket(RemoveBucketArgs.builder().bucket(bucketName).build());
-            flag = bucketExists(bucketName);
-            if (!flag) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-
+    /**
+     * 验证桶名称规则
+     * @param name
+     */
     protected void validateBucketName(String name) {
         validateNotNull(name, "bucket name");
 
@@ -368,10 +83,215 @@ public class MinioBucketService {
         }
     }
 
+    /**
+     * 验证是否配置默认桶名称
+     * @param arg
+     * @param argName
+     */
     protected void validateNotNull(Object arg, String argName) {
         if (arg == null) {
             throw new IllegalArgumentException(argName + " must not be null,Must be configured dist.minio.config.default-bucket=");
         }
+    }
+
+    @MethodComment(function = "指定桶-桶是否存在")
+    public boolean bucketExists() throws Exception {
+        validateBucketName(defaultBucket);
+        return bucketExists(defaultBucket);
+    }
+
+    @MethodComment(function = "指定桶-桶是否存在")
+    public boolean bucketExists(String bucketName) throws Exception {
+        return minioClient.bucketExists(BucketExistsArgs.builder().bucket(bucketName).build());
+    }
+
+    @MethodComment(
+            function = "默认桶-创建新的桶",
+            description = "使用默认桶 defaultBucket，必须配置 dist.minio.config.default-bucket= ")
+    public boolean makeBucket() {
+        validateBucketName(defaultBucket);
+        return makeBucket(defaultBucket);
+    }
+
+    @MethodComment(function = "指定桶-创建新的桶")
+    public boolean makeBucket(String bucketName) {
+        try {
+            boolean isExist = bucketExists(bucketName);
+            if (!isExist) {
+                minioClient.makeBucket(MakeBucketArgs.builder().bucket(bucketName).build());
+            }
+            return true;
+        } catch (Exception e) {
+            logger.error(e.getMessage(), e);
+            return false;
+        }
+    }
+
+
+    @MethodComment(
+            function = "当前用户-所有桶名称")
+    public List<String> listBucketNames() throws Exception {
+        List<Bucket> bucketList = listBuckets();
+        List<String> bucketListName = new ArrayList<>();
+        for (Bucket bucket : bucketList) {
+            bucketListName.add(bucket.name());
+        }
+        return bucketListName;
+    }
+
+    @MethodComment(
+            function = "当前用户-所有桶信息")
+    public List<Bucket> listBuckets() throws Exception {
+        return minioClient.listBuckets();
+    }
+
+    @MethodComment(
+            function = "默认桶-桶中的对象名称列表")
+    public List<String> listObjectNames() throws Exception {
+        validateBucketName(defaultBucket);
+        return listObjectNames(defaultBucket);
+    }
+
+    @MethodComment(
+            function = "指定桶-桶中的对象名称列表",
+            params = {
+                    @Param(name = "bucketName", description = "桶名")
+            })
+    public List<String> listObjectNames(String bucketName) throws Exception {
+        List<String> listObjectNames = new ArrayList<>();
+        Iterable<Result<Item>> myObjects = listObjects(bucketName);
+        if (null == myObjects) {
+            return null;
+        }
+        for (Result<Item> result : myObjects) {
+            Item item = result.get();
+            listObjectNames.add(item.objectName());
+        }
+        return listObjectNames;
+    }
+
+    @MethodComment(
+            function = "默认桶-桶中的对象列表",
+            description = "使用默认桶 defaultBucket，必须配置 dist.minio.config.default-bucket= ")
+    public Iterable<Result<Item>> listObjects() throws Exception {
+        validateBucketName(defaultBucket);
+        return listObjects(defaultBucket);
+    }
+
+    @MethodComment(
+            function = "指定桶-桶中的对象列表",
+            params = {
+                    @Param(name = "bucketName", description = "桶名")
+            })
+    public Iterable<Result<Item>> listObjects(String bucketName) throws Exception {
+        boolean flag = bucketExists(bucketName);
+        if (flag) {
+            return minioClient.listObjects(ListObjectsArgs.builder().bucket(bucketName).build());
+        }
+        return null;
+    }
+
+    @MethodComment(
+            function = "默认桶-获取桶策略",
+            description = "使用默认桶 defaultBucket，必须配置 dist.minio.config.default-bucket= ")
+    public String getBucketPolicy() throws Exception {
+        validateBucketName(defaultBucket);
+        return getBucketPolicy(defaultBucket);
+    }
+
+    @MethodComment(
+            function = "指定桶-获取桶策略",
+            params = {
+                    @Param(name = "bucketName", description = "桶名")
+            })
+    public String getBucketPolicy(String bucketName) throws Exception {
+        return minioClient.getBucketPolicy(
+                GetBucketPolicyArgs.builder()
+                        .bucket(bucketName)
+                        .build());
+    }
+
+
+    @MethodComment(
+            function = "默认桶-设置桶策略",
+            params = {
+                    @Param(name = "configJson", description = "策略json")
+            })
+    public void setBucketPolicy(String configJson) throws Exception {
+        validateBucketName(defaultBucket);
+        setBucketPolicy(defaultBucket, configJson);
+    }
+
+
+    @MethodComment(
+            function = "指定桶-设置桶策略",
+            params = {
+                    @Param(name = "bucketName", description = "桶名"),
+                    @Param(name = "configJson", description = "策略json")
+            })
+    public void setBucketPolicy(String bucketName, String configJson) throws Exception {
+        minioClient.setBucketPolicy(
+                SetBucketPolicyArgs.builder()
+                        .bucket(bucketName)
+                        .config(configJson)
+                        .build());
+    }
+
+    @MethodComment(
+            function = "默认桶-删除存储桶加密",
+            description = "使用默认桶 defaultBucket，必须配置 dist.minio.config.default-bucket= ")
+    public boolean deleteBucketEncryption() {
+        validateBucketName(defaultBucket);
+        return deleteBucketEncryption(defaultBucket);
+    }
+
+    @MethodComment(
+            function = "指定桶-删除存储桶加密",
+            params = {
+                    @Param(name = "bucketName", description = "桶名")
+            }, description = "删除桶中所有对象后再删除桶")
+    public boolean deleteBucketEncryption(String bucketName) {
+        try {
+            minioClient.deleteBucketEncryption(
+                    DeleteBucketEncryptionArgs.builder().bucket(bucketName).build());
+            return true;
+        } catch (Exception e) {
+            logger.error(e.getMessage(), e);
+            return false;
+        }
+    }
+
+    @MethodComment(
+            function = "默认桶-删除桶", description = "只能删除空桶")
+    public boolean deleteNullBucket() throws Exception {
+        validateBucketName(defaultBucket);
+        return deleteNullBucket(defaultBucket);
+    }
+
+    @MethodComment(
+            function = "指定桶-删除桶",
+            params = {
+                    @Param(name = "bucketName", description = "桶名")
+            }, description = "只能删除空桶")
+    public boolean deleteNullBucket(String bucketName) throws Exception {
+        boolean flag = bucketExists(bucketName);
+        if (flag) {
+            Iterable<Result<Item>> myObjects = listObjects(bucketName);
+            for (Result<Item> result : myObjects) {
+                Item item = result.get();
+                // 有对象文件，则删除失败
+                if (item.size() > 0) {
+                    return false;
+                }
+            }
+            // 删除存储桶，注意，只有存储桶为空时才能删除成功。
+            minioClient.removeBucket(RemoveBucketArgs.builder().bucket(bucketName).build());
+            flag = bucketExists(bucketName);
+            if (!flag) {
+                return true;
+            }
+        }
+        return false;
     }
 
 }
