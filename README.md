@@ -50,6 +50,7 @@ dist:
       port: 9000
       accessKey: minioadmin
       secretKey: minioadmin
+      default-bucket: default # 可选，仅支持小写字母,长度必须大于3个字符,默认桶会自动创建
 ```
 
 bean类
