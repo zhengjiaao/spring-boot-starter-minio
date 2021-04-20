@@ -5,16 +5,13 @@ import com.dist.zja.minio.common.annotations.MethodComment;
 import com.dist.zja.minio.common.annotations.Param;
 import com.dist.zja.minio.common.enums.BucetPolicyEnum;
 import io.minio.*;
-import io.minio.errors.*;
 import io.minio.messages.Bucket;
 import io.minio.messages.Item;
+import io.minio.messages.ObjectLockConfiguration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.util.StringUtils;
 
-import java.io.IOException;
-import java.security.InvalidKeyException;
-import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -302,6 +299,15 @@ public class MinioBucketService {
             })
     public void setBucketPolicy(String bucketName, BucetPolicyEnum policy) throws Exception {
         updataBucketPolicy(bucketName, policy);
+    }
+
+    @MethodComment(
+            function = "指定桶-获取存储桶中的对象锁定配置",
+            params = {
+                    @Param(name = "bucketName", description = "桶名称)")
+            })
+    public ObjectLockConfiguration getObjectLockConfiguration(String bucketName) throws Exception {
+        return minioClient.getObjectLockConfiguration(GetObjectLockConfigurationArgs.builder().bucket(bucketName).build());
     }
 
     @MethodComment(

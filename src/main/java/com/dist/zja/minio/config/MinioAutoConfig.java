@@ -4,7 +4,6 @@ import com.dist.zja.minio.MinIoObjectService;
 import com.dist.zja.minio.MinioBucketService;
 import com.dist.zja.minio.properties.MinioProperties;
 import io.minio.MinioClient;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
@@ -57,6 +56,6 @@ public class MinioAutoConfig {
         if (StringUtils.isEmpty(minIo.getDefaultBucket())) {
             return new MinIoObjectService(minioClient);
         }
-        return new MinIoObjectService(minioClient, minIo.getDefaultBucket());
+        return new MinIoObjectService(minioClient, minIo);
     }
 }
