@@ -292,31 +292,6 @@ public class MinIoObjectService {
     }
 
     @MethodComment(
-            function = "默认桶-获取预签名对象网址-URL",
-            params = {
-                    @Param(name = "objectName", description = "存储桶里的对象名称")
-            })
-    public String getPresignedObjectUrl(String objectName) throws Exception {
-        validateBucketName(defaultBucket);
-        return getPresignedObjectUrl(defaultBucket, objectName);
-    }
-
-    @MethodComment(
-            function = "指定桶-获取预签名对象网址-URL",
-            params = {
-                    @Param(name = "bucketName", description = "桶名"),
-                    @Param(name = "objectName", description = "存储桶里的对象名称")
-            })
-    public String getPresignedObjectUrl(String bucketName, String objectName) throws Exception {
-        return minioClient.getPresignedObjectUrl(
-                GetPresignedObjectUrlArgs.builder()
-                        .method(Method.GET)
-                        .bucket(bucketName)
-                        .object(objectName)
-                        .build());
-    }
-
-    @MethodComment(
             function = "默认桶-下载对象-下载到本服务器",
             params = {
                     @Param(name = "objectName", description = "存储桶里的对象名称"),
@@ -394,6 +369,31 @@ public class MinIoObjectService {
                 .bucket(bucketName)
                 .object(objectName)
                 .build()).userMetadata();
+    }
+
+    @MethodComment(
+            function = "默认桶-获取预签名对象网址-URL",
+            params = {
+                    @Param(name = "objectName", description = "存储桶里的对象名称")
+            })
+    public String getPresignedObjectUrl(String objectName) throws Exception {
+        validateBucketName(defaultBucket);
+        return getPresignedObjectUrl(defaultBucket, objectName);
+    }
+
+    @MethodComment(
+            function = "指定桶-获取预签名对象网址-URL",
+            params = {
+                    @Param(name = "bucketName", description = "桶名"),
+                    @Param(name = "objectName", description = "存储桶里的对象名称")
+            })
+    public String getPresignedObjectUrl(String bucketName, String objectName) throws Exception {
+        return minioClient.getPresignedObjectUrl(
+                GetPresignedObjectUrlArgs.builder()
+                        .method(Method.GET)
+                        .bucket(bucketName)
+                        .object(objectName)
+                        .build());
     }
 
     @MethodComment(

@@ -3,6 +3,7 @@ package com.dist.zja.minio;
 import com.dist.zja.minio.common.annotations.ClassComment;
 import com.dist.zja.minio.common.annotations.MethodComment;
 import com.dist.zja.minio.common.annotations.Param;
+import com.dist.zja.minio.common.enums.BucetPolicyEnum;
 import io.minio.*;
 import io.minio.errors.*;
 import io.minio.messages.Bucket;
@@ -29,6 +30,22 @@ import java.util.List;
 public class MinioBucketService {
 
     public static Logger logger = LoggerFactory.getLogger(MinioBucketService.class);
+
+    private static final String BUCKET_PARAM = "${BUCKET_NAME}";
+
+    /**
+     * bucket权限-只读
+     */
+    private static final String READ_ONLY = "{\"Version\":\"2021-04-20\",\"Statement\":[{\"Effect\":\"Allow\",\"Principal\":{\"AWS\":[\"*\"]},\"Action\":[\"s3:GetBucketLocation\",\"s3:ListBucket\"],\"Resource\":[\"arn:aws:s3:::" + BUCKET_PARAM + "\"]},{\"Effect\":\"Allow\",\"Principal\":{\"AWS\":[\"*\"]},\"Action\":[\"s3:GetObject\"],\"Resource\":[\"arn:aws:s3:::" + BUCKET_PARAM + "/*\"]}]}";
+    /**
+     * bucket权限-只写
+     */
+    private static final String WRITE_ONLY = "{\"Version\":\"2021-04-20\",\"Statement\":[{\"Effect\":\"Allow\",\"Principal\":{\"AWS\":[\"*\"]},\"Action\":[\"s3:GetBucketLocation\",\"s3:ListBucketMultipartUploads\"],\"Resource\":[\"arn:aws:s3:::" + BUCKET_PARAM + "\"]},{\"Effect\":\"Allow\",\"Principal\":{\"AWS\":[\"*\"]},\"Action\":[\"s3:AbortMultipartUpload\",\"s3:DeleteObject\",\"s3:ListMultipartUploadParts\",\"s3:PutObject\"],\"Resource\":[\"arn:aws:s3:::" + BUCKET_PARAM + "/*\"]}]}";
+    /**
+     * bucket权限-读写
+     */
+    private static final String READ_WRITE = "{\"Version\":\"2021-04-20\",\"Statement\":[{\"Effect\":\"Allow\",\"Principal\":{\"AWS\":[\"*\"]},\"Action\":[\"s3:GetBucketLocation\",\"s3:ListBucket\",\"s3:ListBucketMultipartUploads\"],\"Resource\":[\"arn:aws:s3:::" + BUCKET_PARAM + "\"]},{\"Effect\":\"Allow\",\"Principal\":{\"AWS\":[\"*\"]},\"Action\":[\"s3:DeleteObject\",\"s3:GetObject\",\"s3:ListMultipartUploadParts\",\"s3:PutObject\",\"s3:AbortMultipartUpload\"],\"Resource\":[\"arn:aws:s3:::" + BUCKET_PARAM + "/*\"]}]}";
+
 
     private MinioClient minioClient;
 
@@ -127,7 +144,6 @@ public class MinioBucketService {
         }
     }
 
-
     @MethodComment(
             function = "当前用户-所有桶名称")
     public List<String> listBucketNames() throws Exception {
@@ -192,52 +208,6 @@ public class MinioBucketService {
     }
 
     @MethodComment(
-            function = "默认桶-获取桶策略",
-            description = "使用默认桶 defaultBucket，必须配置 dist.minio.config.default-bucket= ")
-    public String getBucketPolicy() throws Exception {
-        validateBucketName(defaultBucket);
-        return getBucketPolicy(defaultBucket);
-    }
-
-    @MethodComment(
-            function = "指定桶-获取桶策略",
-            params = {
-                    @Param(name = "bucketName", description = "桶名")
-            })
-    public String getBucketPolicy(String bucketName) throws Exception {
-        return minioClient.getBucketPolicy(
-                GetBucketPolicyArgs.builder()
-                        .bucket(bucketName)
-                        .build());
-    }
-
-
-    @MethodComment(
-            function = "默认桶-设置桶策略",
-            params = {
-                    @Param(name = "configJson", description = "策略json")
-            })
-    public void setBucketPolicy(String configJson) throws Exception {
-        validateBucketName(defaultBucket);
-        setBucketPolicy(defaultBucket, configJson);
-    }
-
-
-    @MethodComment(
-            function = "指定桶-设置桶策略",
-            params = {
-                    @Param(name = "bucketName", description = "桶名"),
-                    @Param(name = "configJson", description = "策略json")
-            })
-    public void setBucketPolicy(String bucketName, String configJson) throws Exception {
-        minioClient.setBucketPolicy(
-                SetBucketPolicyArgs.builder()
-                        .bucket(bucketName)
-                        .config(configJson)
-                        .build());
-    }
-
-    @MethodComment(
             function = "默认桶-删除存储桶加密",
             description = "使用默认桶 defaultBucket，必须配置 dist.minio.config.default-bucket= ")
     public boolean deleteBucketEncryption() {
@@ -292,6 +262,90 @@ public class MinioBucketService {
             }
         }
         return false;
+    }
+
+    @MethodComment(
+            function = "默认桶-获取桶策略",
+            description = "使用默认桶 defaultBucket，必须配置 dist.minio.config.default-bucket= ")
+    public String getBucketPolicy() throws Exception {
+        validateBucketName(defaultBucket);
+        return getBucketPolicy(defaultBucket);
+    }
+
+    @MethodComment(
+            function = "指定桶-获取桶策略",
+            params = {
+                    @Param(name = "bucketName", description = "桶名")
+            })
+    public String getBucketPolicy(String bucketName) throws Exception {
+        return minioClient.getBucketPolicy(
+                GetBucketPolicyArgs.builder()
+                        .bucket(bucketName)
+                        .build());
+    }
+
+    @MethodComment(
+            function = "默认桶-设置桶策略",
+            params = {
+                    @Param(name = "BucetPolicyEnum", description = "策略枚举")
+            })
+    public void setBucketPolicy(BucetPolicyEnum policy) throws Exception {
+        validateBucketName(defaultBucket);
+        setBucketPolicy(defaultBucket, policy);
+    }
+
+    @MethodComment(
+            function = "指定桶-设置桶策略",
+            params = {
+                    @Param(name = "bucketName", description = "桶名"),
+                    @Param(name = "BucetPolicyEnum", description = "策略枚举")
+            })
+    public void setBucketPolicy(String bucketName, BucetPolicyEnum policy) throws Exception {
+        updataBucketPolicy(bucketName, policy);
+    }
+
+    @MethodComment(
+            function = "默认桶-删除桶策略",
+            params = {
+                    @Param(name = "bucketName", description = "桶名")
+            })
+    public void deleteBucketPolicy() throws Exception {
+        validateBucketName(defaultBucket);
+        minioClient.deleteBucketPolicy(DeleteBucketPolicyArgs.builder().bucket(defaultBucket).build());
+    }
+
+    @MethodComment(
+            function = "指定桶-删除桶策略",
+            params = {
+                    @Param(name = "bucketName", description = "桶名")
+            })
+    public void deleteBucketPolicy(String bucketName) throws Exception {
+        minioClient.deleteBucketPolicy(DeleteBucketPolicyArgs.builder().bucket(bucketName).build());
+    }
+
+    /**
+     * 更新桶权限策略
+     *
+     * @param bucketName 桶
+     * @param policy 权限
+     */
+    public void updataBucketPolicy(String bucketName, BucetPolicyEnum policy) throws Exception {
+        switch (policy) {
+            case READ_ONLY:
+                minioClient.setBucketPolicy(SetBucketPolicyArgs.builder().bucket(bucketName).config(READ_ONLY.replace(BUCKET_PARAM, bucketName)).build());
+                break;
+            case WRITE_ONLY:
+                minioClient.setBucketPolicy(SetBucketPolicyArgs.builder().bucket(bucketName).config(WRITE_ONLY.replace(BUCKET_PARAM, bucketName)).build());
+                break;
+            case READ_WRITE:
+                minioClient.setBucketPolicy(SetBucketPolicyArgs.builder().bucket(bucketName).config(READ_WRITE.replace(BUCKET_PARAM, bucketName)).build());
+                break;
+            case NONE:
+                deleteBucketPolicy(bucketName);
+                break;
+            default:
+                break;
+        }
     }
 
 }
