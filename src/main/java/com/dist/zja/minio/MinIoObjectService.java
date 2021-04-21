@@ -526,7 +526,14 @@ public class MinIoObjectService {
                     @Param(name = "objectName", description = "存储桶里的对象名称")
             }, description = "必须设置桶策略为可读(下载),只写权限，用户直接访问地址是查看不了的")
     public String getObjectURL(String bucketName, String objectName) {
-        return url + "/" + bucketName + "/" + objectName;
+        try {
+            statObject(bucketName, objectName);
+            return url + "/" + bucketName + "/" + objectName;
+        } catch (Exception e) {
+//            e.printStackTrace();
+            logger.error(e.getMessage());
+        }
+        return null;
     }
 
     @MethodComment(
