@@ -1,6 +1,6 @@
 package com.dist.zja.minio.config;
 
-import com.dist.zja.minio.MinIoObjectService;
+import com.dist.zja.minio.MinioObjectService;
 import com.dist.zja.minio.MinioBucketService;
 import com.dist.zja.minio.properties.MinioProperties;
 import io.minio.MinioClient;
@@ -52,10 +52,10 @@ public class MinioAutoConfig {
 
     @Bean(initMethod = "init")
     @ConditionalOnMissingBean
-    public MinIoObjectService minIoObjectService(MinioClient minioClient) {
+    public MinioObjectService minIoObjectService(MinioClient minioClient) {
         if (StringUtils.isEmpty(minIo.getDefaultBucket())) {
-            return new MinIoObjectService(minioClient);
+            return new MinioObjectService(minioClient);
         }
-        return new MinIoObjectService(minioClient, minIo);
+        return new MinioObjectService(minioClient, minIo);
     }
 }

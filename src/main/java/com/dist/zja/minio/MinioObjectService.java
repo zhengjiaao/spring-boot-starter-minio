@@ -31,9 +31,9 @@ import java.util.Map;
  * Desc：
  */
 @ClassComment(value = "Minio 对象服务-操作对象", author = "zhengja")
-public class MinIoObjectService {
+public class MinioObjectService {
 
-    public static Logger logger = LoggerFactory.getLogger(MinIoObjectService.class);
+    public static Logger logger = LoggerFactory.getLogger(MinioObjectService.class);
 
     private MinioClient minioClient;
 
@@ -41,11 +41,11 @@ public class MinIoObjectService {
 
     private String defaultBucket;
 
-    public MinIoObjectService(MinioClient minioClient) {
+    public MinioObjectService(MinioClient minioClient) {
         this.minioClient = minioClient;
     }
 
-    public MinIoObjectService(MinioClient minioClient, MinioProperties minIo) {
+    public MinioObjectService(MinioClient minioClient, MinioProperties minIo) {
         this.minioClient = minioClient;
         this.url = minIo.getEndpoint() + ":" + minIo.getPort();
         this.defaultBucket = minIo.getDefaultBucket();
