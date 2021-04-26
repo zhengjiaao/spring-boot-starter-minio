@@ -553,9 +553,9 @@ public class MinioObjectService {
             params = {
                     @Param(name = "objectName", description = "存储桶里的对象名称")
             }, description = "默认分享链接地址失效时间为7天")
-    public String getPresignedObjectUrl(String objectName) throws Exception {
+    public String getObjectShareLink(String objectName) throws Exception {
         validateBucketName(defaultBucket);
-        return getPresignedObjectUrl(defaultBucket, objectName);
+        return getObjectShareLink(defaultBucket, objectName);
     }
 
     @MethodComment(
@@ -564,7 +564,7 @@ public class MinioObjectService {
                     @Param(name = "bucketName", description = "桶名"),
                     @Param(name = "objectName", description = "存储桶里的对象名称")
             }, description = "默认分享链接地址失效时间为7天")
-    public String getPresignedObjectUrl(String bucketName, String objectName) throws Exception {
+    public String getObjectShareLink(String bucketName, String objectName) throws Exception {
         return minioClient.getPresignedObjectUrl(
                 GetPresignedObjectUrlArgs.builder()
                         .method(Method.GET)
@@ -580,9 +580,9 @@ public class MinioObjectService {
                     @Param(name = "expiry", description = "失效时间（以秒为单位），默认是7天，不得大于七天")
             },
             description = "设置有效期的分享链接（共享文件时间最大7天）。生成一个给HTTP GET请求用的presigned URL。浏览器/移动端的客户端可以用这个URL进行下载，即使其所在的存储桶是私有的。这个presigned URL可以设置一个失效时间，默认值是7天")
-    public String presignedGetObjectGetUrl(String objectName, int expiry) throws Exception {
+    public String getObjectShareLink(String objectName, int expiry) throws Exception {
         validateBucketName(defaultBucket);
-        return presignedGetObjectGetUrl(defaultBucket, objectName, expiry);
+        return getObjectShareLink(defaultBucket, objectName, expiry);
     }
 
     @MethodComment(
@@ -593,7 +593,7 @@ public class MinioObjectService {
                     @Param(name = "expiry", description = "失效时间（以秒为单位），默认是7天，不得大于七天")
             },
             description = "设置有效期的分享链接（共享文件时间最大7天）。生成一个给HTTP GET请求用的presigned URL。浏览器/移动端的客户端可以用这个URL进行下载，即使其所在的存储桶是私有的。这个presigned URL可以设置一个失效时间，默认值是7天")
-    public String presignedGetObjectGetUrl(String bucketName, String objectName, int expiry) throws Exception {
+    public String getObjectShareLink(String bucketName, String objectName, int expiry) throws Exception {
         return minioClient.getPresignedObjectUrl(GetPresignedObjectUrlArgs.builder()
                 .bucket(bucketName)
                 .object(objectName)
@@ -608,9 +608,9 @@ public class MinioObjectService {
                     @Param(name = "expiry", description = "失效时间（以秒为单位），默认是7天，不得大于七天")
             },
             description = "设置有效期的分享链接（共享文件时间最大7天）")
-    public byte[] presignedGetObjectGetQRcode(String objectName, int expiry, int width, int heigth) throws Exception {
+    public byte[] getObjectShareQRcode(String objectName, int expiry, int width, int heigth) throws Exception {
         validateBucketName(defaultBucket);
-        return presignedGetObjectGetQRcode(defaultBucket, objectName, expiry, width, heigth);
+        return getObjectShareQRcode(defaultBucket, objectName, expiry, width, heigth);
     }
 
     @MethodComment(
@@ -621,10 +621,10 @@ public class MinioObjectService {
                     @Param(name = "expiry", description = "失效时间（以秒为单位），默认是7天，不得大于七天")
             },
             description = "设置有效期的分享链接（共享文件时间最大7天）")
-    public byte[] presignedGetObjectGetQRcode(String bucketName, String objectName, int expiry, int width, int heigth) throws Exception {
+    public byte[] getObjectShareQRcode(String bucketName, String objectName, int expiry, int width, int heigth) throws Exception {
         Map<EncodeHintType, Object> hints = new HashMap<EncodeHintType, Object>();
         hints.put(EncodeHintType.CHARACTER_SET, "UTF-8");
-        BitMatrix bitMatrix = new MultiFormatWriter().encode(presignedGetObjectGetUrl(bucketName, objectName, expiry),
+        BitMatrix bitMatrix = new MultiFormatWriter().encode(getObjectShareLink(bucketName, objectName, expiry),
                 BarcodeFormat.QR_CODE, width, heigth, hints);
         BufferedImage image = ZxingOrCodeUtils.deleteWhite(bitMatrix);
         ByteArrayOutputStream os = new ByteArrayOutputStream();
