@@ -59,45 +59,6 @@ public class MinioObjectService {
         logger.info("com.dist.zja.minio.MinIoObjectService  Init Success！");
     }
 
-    /**
-     * 验证桶名称
-     * @param name
-     */
-    protected void validateBucketName(String name) {
-        validateNotNull(name, "bucket name");
-
-        // Bucket names cannot be no less than 3 and no more than 63 characters long.
-        if (name.length() < 3 || name.length() > 63) {
-            throw new IllegalArgumentException(
-                    name + " : " + "bucket name must be at least 3 and no more than 63 characters long");
-        }
-        // Successive periods in bucket names are not allowed.
-        if (name.contains("..")) {
-            String msg =
-                    "bucket name cannot contain successive periods. For more information refer "
-                            + "http://docs.aws.amazon.com/AmazonS3/latest/dev/BucketRestrictions.html";
-            throw new IllegalArgumentException(name + " : " + msg);
-        }
-        // Bucket names should be dns compatible.
-        if (!name.matches("^[a-z0-9][a-z0-9\\.\\-]+[a-z0-9]$")) {
-            String msg =
-                    "bucket name does not follow Amazon S3 standards. For more information refer "
-                            + "http://docs.aws.amazon.com/AmazonS3/latest/dev/BucketRestrictions.html";
-            throw new IllegalArgumentException(name + " : " + msg);
-        }
-    }
-
-    /**
-     * 验证是否配置默认桶
-     * @param arg
-     * @param argName
-     */
-    protected void validateNotNull(Object arg, String argName) {
-        if (arg == null) {
-            throw new IllegalArgumentException(argName + " must not be null,Must be configured dist.minio.config.default-bucket=");
-        }
-    }
-
     @MethodComment(
             function = "默认桶-对象上传-本地对象路径",
             params = {
@@ -105,7 +66,7 @@ public class MinioObjectService {
                     @Param(name = "filePath", description = "本地对象路径")
             })
     public ObjectWriteResponse putObject(String objectName, String filename) throws Exception {
-        validateBucketName(defaultBucket);
+        
         if (Files.isDirectory(Paths.get(filename))) {
             File dirs = new File(filename);
             if (dirs.list().length < 0) {
@@ -142,7 +103,7 @@ public class MinioObjectService {
                     @Param(name = "folderName", description = "对象id(存储名称)")
             }, description = "创建对象以“ /”结尾（也称为文件夹或目录）")
     public ObjectWriteResponse putObjectByFolder(String folderName) throws Exception {
-        validateBucketName(defaultBucket);
+        
         return putObjectByFolder(defaultBucket, folderName);
     }
 
@@ -166,7 +127,7 @@ public class MinioObjectService {
                     @Param(name = "multipartFile", description = "多部分单个对象")
             }, description = "单个对象的最大大小限制在5TB。putObject在对象大于5MiB时，自动使用multiple parts方式上传。这样，当上传失败时，客户端只需要上传未成功的部分即可（类似断点上传）。上传的对象使用MD5SUM签名进行完整性验证")
     public ObjectWriteResponse putObjectByMultipartFile(String objectName, MultipartFile multipartFile) {
-        validateBucketName(defaultBucket);
+        
         return putObjectByMultipartFile(defaultBucket, objectName, multipartFile);
     }
 
@@ -200,7 +161,7 @@ public class MinioObjectService {
                     @Param(name = "InputStream", description = "对象流")
             }, description = "单个对象的最大大小限制在5TB。putObject在对象大于5MiB时，自动使用multiple parts方式上传。这样，当上传失败时，客户端只需要上传未成功的部分即可（类似断点上传）。上传的对象使用MD5SUM签名进行完整性验证")
     public ObjectWriteResponse putObject(String objectName, InputStream stream) {
-        validateBucketName(defaultBucket);
+        
         return putObject(defaultBucket, objectName, stream);
     }
 
@@ -240,7 +201,7 @@ public class MinioObjectService {
                     @Param(name = "InputStream", description = "对象流")
             }, description = "单个对象的最大大小限制在5TB。putObject在对象大于5MiB时，自动使用multiple parts方式上传。这样，当上传失败时，客户端只需要上传未成功的部分即可（类似断点上传）。上传的对象使用MD5SUM签名进行完整性验证")
     public ObjectWriteResponse putObject(String objectName, InputStream stream, Map<String, String> headers, Map<String, String> userMetadata) {
-        validateBucketName(defaultBucket);
+        
         return putObject(defaultBucket, objectName, stream, headers, userMetadata);
     }
 
@@ -284,7 +245,7 @@ public class MinioObjectService {
                     @Param(name = "contentType", description = "内容类型")
             }, description = "单个对象的最大大小限制在5TB。putObject在对象大于5MiB时，自动使用multiple parts方式上传。这样，当上传失败时，客户端只需要上传未成功的部分即可（类似断点上传）。上传的对象使用MD5SUM签名进行完整性验证")
     public ObjectWriteResponse putObject(String objectName, InputStream stream, String contentType) {
-        validateBucketName(defaultBucket);
+        
         return putObject(defaultBucket, objectName, stream, contentType);
     }
 
@@ -323,7 +284,7 @@ public class MinioObjectService {
                     @Param(name = "objectName", description = "存储桶里的对象名称")
             })
     public GetObjectResponse getObject(String objectName) throws Exception {
-        validateBucketName(defaultBucket);
+        
         return getObject(defaultBucket, objectName);
     }
 
@@ -350,7 +311,7 @@ public class MinioObjectService {
             },
             description = "下载对象指定区域的字节数组做为流。（断点下载）")
     public GetObjectResponse getObject(String objectName, Long offset, Long length) throws Exception {
-        validateBucketName(defaultBucket);
+        
         return getObject(defaultBucket, objectName, offset, length);
     }
 
@@ -380,7 +341,7 @@ public class MinioObjectService {
                     @Param(name = "HttpServletResponse", description = "response")
             })
     public void downloadObject(String objectName, HttpServletResponse response) {
-        validateBucketName(defaultBucket);
+        
         downloadObject(defaultBucket, objectName, response);
     }
 
@@ -418,7 +379,7 @@ public class MinioObjectService {
                     @Param(name = "filename", description = "对象存储位置")
             }, description = "下载并将文件保存到本地")
     public void downloadObject(String objectName, String filename) throws Exception {
-        validateBucketName(defaultBucket);
+        
         downloadObject(defaultBucket, objectName, filename);
     }
 
@@ -445,7 +406,7 @@ public class MinioObjectService {
             },
             description = "调用statObject()来判断对象是否存在,如果不存在, statObject()抛出异常")
     public StatObjectResponse statObject(String objectName) throws Exception {
-        validateBucketName(defaultBucket);
+        
         return statObject(defaultBucket, objectName);
     }
 
@@ -471,7 +432,7 @@ public class MinioObjectService {
             },
             description = "调用statObject()来判断对象是否存在,如果不存在, statObject()抛出异常")
     public Map<String, String> getObjectUserMetadata(String objectName) throws Exception {
-        validateBucketName(defaultBucket);
+        
         return getObjectUserMetadata(defaultBucket, objectName);
     }
 
@@ -496,7 +457,7 @@ public class MinioObjectService {
                     @Param(name = "sqlExpression", description = "sql表达式 例如：select * from S3Object")
             }, description = "具体使用参考官网")
     public SelectResponseStream selectObjectContent(String objectName, String sqlExpression) throws Exception {
-        validateBucketName(defaultBucket);
+        
         return selectObjectContent(defaultBucket, objectName, sqlExpression);
     }
 
@@ -526,8 +487,8 @@ public class MinioObjectService {
             params = {
                     @Param(name = "objectName", description = "存储桶里的对象名称")
             }, description = "必须设置桶策略为可读(下载),只写权限，用户直接访问地址是查看不了的")
-    public String getObjectURL(String objectName) {
-        validateBucketName(defaultBucket);
+    public String getObjectURL(String objectName) throws Exception {
+        
         return getObjectURL(defaultBucket, objectName);
     }
 
@@ -537,15 +498,9 @@ public class MinioObjectService {
                     @Param(name = "bucketName", description = "桶名"),
                     @Param(name = "objectName", description = "存储桶里的对象名称")
             }, description = "必须设置桶策略为可读(下载),只写权限，用户直接访问地址是查看不了的")
-    public String getObjectURL(String bucketName, String objectName) {
-        try {
-            statObject(bucketName, objectName);
-            return url + "/" + bucketName + "/" + objectName;
-        } catch (Exception e) {
-//            e.printStackTrace();
-            logger.error(e.getMessage());
-        }
-        return null;
+    public String getObjectURL(String bucketName, String objectName) throws Exception {
+        statObject(bucketName, objectName);
+        return url + "/" + bucketName + "/" + objectName;
     }
 
     @MethodComment(
@@ -554,7 +509,7 @@ public class MinioObjectService {
                     @Param(name = "objectName", description = "存储桶里的对象名称")
             }, description = "默认分享链接地址失效时间为7天")
     public String getObjectShareLink(String objectName) throws Exception {
-        validateBucketName(defaultBucket);
+        
         return getObjectShareLink(defaultBucket, objectName);
     }
 
@@ -581,7 +536,7 @@ public class MinioObjectService {
             },
             description = "设置有效期的分享链接（共享文件时间最大7天）。生成一个给HTTP GET请求用的presigned URL。浏览器/移动端的客户端可以用这个URL进行下载，即使其所在的存储桶是私有的。这个presigned URL可以设置一个失效时间，默认值是7天")
     public String getObjectShareLink(String objectName, int expiry) throws Exception {
-        validateBucketName(defaultBucket);
+        
         return getObjectShareLink(defaultBucket, objectName, expiry);
     }
 
@@ -597,6 +552,7 @@ public class MinioObjectService {
         return minioClient.getPresignedObjectUrl(GetPresignedObjectUrlArgs.builder()
                 .bucket(bucketName)
                 .object(objectName)
+                .method(Method.GET)
                 .expiry(expiry)
                 .build());
     }
@@ -609,7 +565,7 @@ public class MinioObjectService {
             },
             description = "设置有效期的分享链接（共享文件时间最大7天）")
     public byte[] getObjectShareQRcode(String objectName, int expiry, int width, int heigth) throws Exception {
-        validateBucketName(defaultBucket);
+        
         return getObjectShareQRcode(defaultBucket, objectName, expiry, width, heigth);
     }
 
@@ -639,7 +595,7 @@ public class MinioObjectService {
                     @Param(name = "recursive", description = "是否递归子目录")
             })
     public List getAllObjectsByPrefix(String prefix, boolean recursive) throws Exception {
-        validateBucketName(defaultBucket);
+        
         return getAllObjectsByPrefix(defaultBucket, prefix, recursive);
     }
 
@@ -677,7 +633,7 @@ public class MinioObjectService {
                     @Param(name = "objectName", description = "对象ID(存储桶里的对象名称)")
             }, description = "通过使用服务器端副本组合来自不同源对象的数据来创建对象，服务器上已存在的对象列表再次组合成一个对象")
     public ObjectWriteResponse composeObject(String objectName, List<ComposeSource> sourceObjectList) throws Exception {
-        validateBucketName(defaultBucket);
+        
         return composeObject(defaultBucket, objectName, sourceObjectList);
     }
 
@@ -701,7 +657,7 @@ public class MinioObjectService {
                     @Param(name = "objectName", description = "对象ID(存储桶里的对象名称)")
             }, description = "通过使用服务器端副本组合来自不同源对象的数据来创建对象，服务器上已存在的对象列表再次组合成一个对象")
     public ObjectWriteResponse copyObject(String objectName, CopySource source) throws Exception {
-        validateBucketName(defaultBucket);
+        
         return copyObject(defaultBucket, objectName, source);
     }
 
@@ -727,7 +683,7 @@ public class MinioObjectService {
                     @Param(name = "objectName", description = "对象ID(存储桶里的对象名称)")
             })
     public void setObjectTags(String objectName, Tags tags) throws Exception {
-        validateBucketName(defaultBucket);
+        
         setObjectTags(defaultBucket, objectName, tags);
     }
 
@@ -751,7 +707,7 @@ public class MinioObjectService {
                     @Param(name = "objectName", description = "对象ID(存储桶里的对象名称)")
             })
     public void getObjectTags(String objectName) throws Exception {
-        validateBucketName(defaultBucket);
+        
         getObjectTags(defaultBucket, objectName);
     }
 
@@ -775,7 +731,7 @@ public class MinioObjectService {
                     @Param(name = "objectName", description = "对象ID(存储桶里的对象名称)")
             })
     public void deleteObjectTags(String objectName) throws Exception {
-        validateBucketName(defaultBucket);
+        
         deleteObjectTags(defaultBucket, objectName);
     }
 
@@ -799,7 +755,7 @@ public class MinioObjectService {
                     @Param(name = "objectName", description = "对象ID(存储桶里的对象名称)")
             })
     public void deleteObject(String objectName) throws Exception {
-        validateBucketName(defaultBucket);
+        
         deleteObject(defaultBucket, objectName);
     }
 
@@ -823,7 +779,7 @@ public class MinioObjectService {
                     @Param(name = "objectName", description = "对象ID(存储桶里的对象名称)")
             })
     public void deleteObjects(List<DeleteObject> objectNames) throws Exception {
-        validateBucketName(defaultBucket);
+        
         deleteObjects(defaultBucket, objectNames);
     }
 

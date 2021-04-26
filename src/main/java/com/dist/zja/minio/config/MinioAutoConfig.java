@@ -27,6 +27,9 @@ public class MinioAutoConfig {
     private MinioProperties minIo;
 
     public MinioAutoConfig(MinioProperties minioProperties) {
+        if (minioProperties.getDefaultBucket() != null) {
+            validateBucketName(minioProperties.getDefaultBucket());
+        }
         this.minIo = minioProperties;
     }
 
@@ -58,4 +61,27 @@ public class MinioAutoConfig {
         }
         return new MinioObjectService(minioClient, minIo);
     }
+
+
+    /**
+     * 验证桶名称
+     * @param name
+     */
+    private static void validateBucketName(String name) {
+        // Bucket names cannot be no less than 3 and no more than 63 characters long.
+        if (name.length() < 3 || name.length() > 63) {
+            throw new IllegalArgumentException(name + " : " + "defaultBucket name must be at least 3 and no more than 63 characters long");
+        }
+        // Successive periods in bucket names are not allowed.
+        if (name.contains("..")) {
+            String msg = "defaultBucket name cannot contain successive periods.";
+            throw new IllegalArgumentException(name + " : " + msg);
+        }
+        // Bucket names should be dns compatible.
+        if (!name.matches("^[a-z0-9][a-z0-9\\.\\-]+[a-z0-9]$")) {
+            String msg = "defaultBucket name does not follow Amazon S3 standards.";
+            throw new IllegalArgumentException(name + " : " + msg);
+        }
+    }
+
 }
