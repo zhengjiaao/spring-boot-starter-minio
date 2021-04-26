@@ -1,7 +1,7 @@
 package com.dist.zja.minio.config;
 
-import com.dist.zja.minio.MinioObjectService;
 import com.dist.zja.minio.MinioBucketService;
+import com.dist.zja.minio.MinioObjectService;
 import com.dist.zja.minio.properties.MinioProperties;
 import io.minio.MinioClient;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;

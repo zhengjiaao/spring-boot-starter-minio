@@ -4,6 +4,7 @@ import com.dist.zja.minio.common.annotations.ClassComment;
 import com.dist.zja.minio.common.annotations.MethodComment;
 import com.dist.zja.minio.common.annotations.Param;
 import com.dist.zja.minio.common.enums.BucetPolicyEnum;
+import io.minio.MinioClient;
 import io.minio.*;
 import io.minio.messages.Bucket;
 import io.minio.messages.Item;

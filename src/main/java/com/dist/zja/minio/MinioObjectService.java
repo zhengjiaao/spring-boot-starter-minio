@@ -3,8 +3,13 @@ package com.dist.zja.minio;
 import com.dist.zja.minio.common.annotations.ClassComment;
 import com.dist.zja.minio.common.annotations.MethodComment;
 import com.dist.zja.minio.common.annotations.Param;
+import com.dist.zja.minio.common.utils.ZxingOrCodeUtils;
 import com.dist.zja.minio.properties.MinioProperties;
 import com.google.common.io.ByteStreams;
+import com.google.zxing.BarcodeFormat;
+import com.google.zxing.EncodeHintType;
+import com.google.zxing.MultiFormatWriter;
+import com.google.zxing.common.BitMatrix;
 import io.minio.*;
 import io.minio.http.Method;
 import io.minio.messages.*;
@@ -12,18 +17,14 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.imageio.ImageIO;
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletResponse;
-import java.io.ByteArrayInputStream;
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
+import java.awt.image.BufferedImage;
+import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Company: 上海数慧系统技术有限公司
@@ -118,9 +119,6 @@ public class MinioObjectService {
         return putObject(defaultBucket, objectName, filename);
     }
 
-
-
-
     @MethodComment(
             function = "指定桶-对象上传-本地对象路径",
             params = {
@@ -166,8 +164,7 @@ public class MinioObjectService {
             params = {
                     @Param(name = "objectName", description = "存储桶里的对象名称"),
                     @Param(name = "multipartFile", description = "多部分单个对象")
-            },
-            description = "按指定 objectName 存储")
+            }, description = "单个对象的最大大小限制在5TB。putObject在对象大于5MiB时，自动使用multiple parts方式上传。这样，当上传失败时，客户端只需要上传未成功的部分即可（类似断点上传）。上传的对象使用MD5SUM签名进行完整性验证")
     public ObjectWriteResponse putObjectByMultipartFile(String objectName, MultipartFile multipartFile) {
         validateBucketName(defaultBucket);
         return putObjectByMultipartFile(defaultBucket, objectName, multipartFile);
@@ -179,8 +176,7 @@ public class MinioObjectService {
                     @Param(name = "bucketName", description = "桶名"),
                     @Param(name = "objectName", description = "存储桶里的对象名称"),
                     @Param(name = "multipartFile", description = "多部分单个对象")
-            },
-            description = "按指定 objectName 存储")
+            }, description = "单个对象的最大大小限制在5TB。putObject在对象大于5MiB时，自动使用multiple parts方式上传。这样，当上传失败时，客户端只需要上传未成功的部分即可（类似断点上传）。上传的对象使用MD5SUM签名进行完整性验证")
     public ObjectWriteResponse putObjectByMultipartFile(String bucketName, String objectName, MultipartFile multipartFile) {
         try (InputStream inputStream = multipartFile.getInputStream()) {
             return minioClient.putObject(PutObjectArgs.builder()
@@ -202,7 +198,7 @@ public class MinioObjectService {
             params = {
                     @Param(name = "objectName", description = "对象名称"),
                     @Param(name = "InputStream", description = "对象流")
-            })
+            }, description = "单个对象的最大大小限制在5TB。putObject在对象大于5MiB时，自动使用multiple parts方式上传。这样，当上传失败时，客户端只需要上传未成功的部分即可（类似断点上传）。上传的对象使用MD5SUM签名进行完整性验证")
     public ObjectWriteResponse putObject(String objectName, InputStream stream) {
         validateBucketName(defaultBucket);
         return putObject(defaultBucket, objectName, stream);
@@ -214,7 +210,7 @@ public class MinioObjectService {
                     @Param(name = "bucketName", description = "桶名"),
                     @Param(name = "objectName", description = "对象名称"),
                     @Param(name = "InputStream", description = "对象流")
-            })
+            }, description = "单个对象的最大大小限制在5TB。putObject在对象大于5MiB时，自动使用multiple parts方式上传。这样，当上传失败时，客户端只需要上传未成功的部分即可（类似断点上传）。上传的对象使用MD5SUM签名进行完整性验证")
     public ObjectWriteResponse putObject(String bucketName, String objectName, InputStream stream) {
         try {
             ObjectWriteResponse objectWriteResponse = minioClient.putObject(PutObjectArgs.builder()
@@ -242,7 +238,7 @@ public class MinioObjectService {
             params = {
                     @Param(name = "objectName", description = "对象名称"),
                     @Param(name = "InputStream", description = "对象流")
-            })
+            }, description = "单个对象的最大大小限制在5TB。putObject在对象大于5MiB时，自动使用multiple parts方式上传。这样，当上传失败时，客户端只需要上传未成功的部分即可（类似断点上传）。上传的对象使用MD5SUM签名进行完整性验证")
     public ObjectWriteResponse putObject(String objectName, InputStream stream, Map<String, String> headers, Map<String, String> userMetadata) {
         validateBucketName(defaultBucket);
         return putObject(defaultBucket, objectName, stream, headers, userMetadata);
@@ -254,7 +250,7 @@ public class MinioObjectService {
                     @Param(name = "bucketName", description = "桶名"),
                     @Param(name = "objectName", description = "对象名称"),
                     @Param(name = "InputStream", description = "对象流")
-            })
+            }, description = "单个对象的最大大小限制在5TB。putObject在对象大于5MiB时，自动使用multiple parts方式上传。这样，当上传失败时，客户端只需要上传未成功的部分即可（类似断点上传）。上传的对象使用MD5SUM签名进行完整性验证")
     public ObjectWriteResponse putObject(String bucketName, String objectName, InputStream stream, Map<String, String> headers, Map<String, String> userMetadata) {
         try {
             ObjectWriteResponse objectWriteResponse = minioClient.putObject(PutObjectArgs.builder()
@@ -286,7 +282,7 @@ public class MinioObjectService {
                     @Param(name = "objectName", description = "对象名称"),
                     @Param(name = "InputStream", description = "对象流"),
                     @Param(name = "contentType", description = "内容类型")
-            })
+            }, description = "单个对象的最大大小限制在5TB。putObject在对象大于5MiB时，自动使用multiple parts方式上传。这样，当上传失败时，客户端只需要上传未成功的部分即可（类似断点上传）。上传的对象使用MD5SUM签名进行完整性验证")
     public ObjectWriteResponse putObject(String objectName, InputStream stream, String contentType) {
         validateBucketName(defaultBucket);
         return putObject(defaultBucket, objectName, stream, contentType);
@@ -299,13 +295,13 @@ public class MinioObjectService {
                     @Param(name = "objectName", description = "对象名称"),
                     @Param(name = "InputStream", description = "对象流"),
                     @Param(name = "contentType", description = "内容类型")
-            })
+            }, description = "单个对象的最大大小限制在5TB。putObject在对象大于5MiB时，自动使用multiple parts方式上传。这样，当上传失败时，客户端只需要上传未成功的部分即可（类似断点上传）。上传的对象使用MD5SUM签名进行完整性验证")
     public ObjectWriteResponse putObject(String bucketName, String objectName, InputStream stream, String contentType) {
         try {
             ObjectWriteResponse objectWriteResponse = minioClient.putObject(PutObjectArgs.builder()
                     .bucket(bucketName)
                     .object(objectName)
-                    .stream(stream, stream.available(), ObjectWriteArgs.MAX_OBJECT_SIZE)
+                    .stream(stream, stream.available(), -1)
                     .contentType(contentType)
                     .build());
             return objectWriteResponse;
@@ -420,7 +416,7 @@ public class MinioObjectService {
             params = {
                     @Param(name = "objectName", description = "存储桶里的对象名称"),
                     @Param(name = "filename", description = "对象存储位置")
-            })
+            }, description = "下载并将文件保存到本地")
     public void downloadObject(String objectName, String filename) throws Exception {
         validateBucketName(defaultBucket);
         downloadObject(defaultBucket, objectName, filename);
@@ -432,7 +428,7 @@ public class MinioObjectService {
                     @Param(name = "bucketName", description = "桶名"),
                     @Param(name = "objectName", description = "存储桶里的对象名称"),
                     @Param(name = "filename", description = "对象存储位置")
-            })
+            }, description = "下载并将文件保存到本地")
     public void downloadObject(String bucketName, String objectName, String filename) throws Exception {
         minioClient.downloadObject(DownloadObjectArgs.builder()
                 .bucket(bucketName)
@@ -603,6 +599,37 @@ public class MinioObjectService {
                 .object(objectName)
                 .expiry(expiry)
                 .build());
+    }
+
+    @MethodComment(
+            function = "默认桶-获取对象外链二维码-自定义设置分享过期时间",
+            params = {
+                    @Param(name = "objectName", description = "对象ID(存储桶里的对象名称)"),
+                    @Param(name = "expiry", description = "失效时间（以秒为单位），默认是7天，不得大于七天")
+            },
+            description = "设置有效期的分享链接（共享文件时间最大7天）")
+    public byte[] presignedGetObjectGetQRcode(String objectName, int expiry, int width, int heigth) throws Exception {
+        validateBucketName(defaultBucket);
+        return presignedGetObjectGetQRcode(defaultBucket, objectName, expiry, width, heigth);
+    }
+
+    @MethodComment(
+            function = "指定桶-获取对象外链二维码-自定义设置分享过期时间",
+            params = {
+                    @Param(name = "bucketName", description = "桶名"),
+                    @Param(name = "objectName", description = "对象ID(存储桶里的对象名称)"),
+                    @Param(name = "expiry", description = "失效时间（以秒为单位），默认是7天，不得大于七天")
+            },
+            description = "设置有效期的分享链接（共享文件时间最大7天）")
+    public byte[] presignedGetObjectGetQRcode(String bucketName, String objectName, int expiry, int width, int heigth) throws Exception {
+        Map<EncodeHintType, Object> hints = new HashMap<EncodeHintType, Object>();
+        hints.put(EncodeHintType.CHARACTER_SET, "UTF-8");
+        BitMatrix bitMatrix = new MultiFormatWriter().encode(presignedGetObjectGetUrl(bucketName, objectName, expiry),
+                BarcodeFormat.QR_CODE, width, heigth, hints);
+        BufferedImage image = ZxingOrCodeUtils.deleteWhite(bitMatrix);
+        ByteArrayOutputStream os = new ByteArrayOutputStream();
+        ImageIO.write(image, "jpg", os);
+        return os.toByteArray();
     }
 
     @MethodComment(

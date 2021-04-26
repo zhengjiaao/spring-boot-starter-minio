@@ -46,6 +46,18 @@
             <scope>provided</scope>
         </dependency>
 
+        <!--zxing二维码依赖 方式二(推荐)-->
+        <dependency>
+            <groupId>com.google.zxing</groupId>
+            <artifactId>core</artifactId>
+            <version>3.4.1</version>
+        </dependency>
+        <dependency>
+            <groupId>com.google.zxing</groupId>
+            <artifactId>javase</artifactId>
+            <version>3.4.1</version>
+        </dependency>
+
     </dependencies>
 
 
@@ -55,6 +67,7 @@
                 <directory>src/main/resources</directory>
                 <excludes>
                     <exclude>configs/</exclude>
+                    <exclude>libs/</exclude>
                 </excludes>
             </resource>
         </resources>
