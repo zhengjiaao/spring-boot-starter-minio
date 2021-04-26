@@ -15,8 +15,11 @@ import org.springframework.web.multipart.MultipartFile;
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletResponse;
 import java.io.ByteArrayInputStream;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -102,8 +105,21 @@ public class MinioObjectService {
             })
     public ObjectWriteResponse putObject(String objectName, String filename) throws Exception {
         validateBucketName(defaultBucket);
+        if (Files.isDirectory(Paths.get(filename))) {
+            File dirs = new File(filename);
+            if (dirs.list().length < 0) {
+                return putObjectByFolder(objectName);
+            }
+            for (File f : dirs.listFiles()) {
+
+            }
+        }
+
         return putObject(defaultBucket, objectName, filename);
     }
+
+
+
 
     @MethodComment(
             function = "指定桶-对象上传-本地对象路径",
