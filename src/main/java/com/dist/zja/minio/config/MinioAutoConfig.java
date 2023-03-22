@@ -21,7 +21,7 @@ import org.springframework.util.StringUtils;
  */
 @Configuration
 @EnableConfigurationProperties({MinioProperties.class})
-@ConditionalOnProperty(name = "dist.minio.config.enabled", matchIfMissing = true)
+@ConditionalOnProperty(name = "dist.minio.enabled", matchIfMissing = true)
 public class MinioAutoConfig {
 
     private MinioProperties minIo;
