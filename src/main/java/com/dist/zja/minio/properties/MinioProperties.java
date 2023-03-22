@@ -11,7 +11,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
  * Email: zhengja@dist.com.cn
  * Desc：
  */
-@ConfigurationProperties(prefix = "dist.minio.config")
+@ConfigurationProperties(prefix = "dist.minio")
 public class MinioProperties {
 
     /**
